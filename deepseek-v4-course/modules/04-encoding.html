@@ -1,0 +1,148 @@
+<section class="module" id="module-4">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">编码系统详解</h1>
+      <p class="module-subtitle">探索消息编码和分布式词汇表处理机制</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">分布式词汇表</h2>
+      <p class="animate-in">DeepSeek-V4-Flash使用分布式词汇表，将词汇表分片存储在不同的GPU上，支持超大规模模型的训练和推理。</p>
+      
+      <div class="layer-demo animate-in">
+        <div class="layer-tabs">
+          <button class="layer-tab active" onclick="showLayer('layer-1', this)">词嵌入</button>
+          <button class="layer-tab" onclick="showLayer('layer-2', this)">词汇表分片</button>
+          <button class="layer-tab" onclick="showLayer('layer-3', this)">输出头</button>
+        </div>
+        <div class="layer-content">
+          <div class="layer" id="layer-1">
+            <div class="layer-visual">
+              <div class="vocab-block">
+                <div class="vocab-item">Token ID: 0</div>
+                <div class="vocab-arrow">→</div>
+                <div class="vocab-item">Embedding Vector</div>
+              </div>
+              <div class="vocab-block">
+                <div class="vocab-item">Token ID: 1</div>
+                <div class="vocab-arrow">→</div>
+                <div class="vocab-item">Embedding Vector</div>
+              </div>
+              <div class="vocab-block">
+                <div class="vocab-item">Token ID: N</div>
+                <div class="vocab-arrow">→</div>
+                <div class="vocab-item">Embedding Vector</div>
+              </div>
+            </div>
+          </div>
+          <div class="layer" id="layer-2" style="display: none;">
+            <div class="layer-visual">
+              <div class="shard-container">
+                <div class="shard">GPU 0<br>Tokens 0-8191</div>
+                <div class="shard">GPU 1<br>Tokens 8192-16383</div>
+                <div class="shard">GPU 2<br>Tokens 16384-24575</div>
+                <div class="shard">GPU 3<br>Tokens 24576-32767</div>
+              </div>
+              <p class="shard-note">词汇表大小: 128,256 tokens</p>
+            </div>
+          </div>
+          <div class="layer" id="layer-3" style="display: none;">
+            <div class="layer-visual">
+              <div class="head-block">
+                <div class="head-input">Hidden States</div>
+                <div class="head-arrow">→</div>
+                <div class="head-matrix">Parallel Head</div>
+                <div class="head-arrow">→</div>
+                <div class="head-output">Logits (128K)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">编码系统代码解析</h2>
+      
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">Python</span>
+          <span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ParallelEmbedding</span><span class="code-keyword">(nn.Module)</span>:</span>
+          <span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span><span class="code-operator">(</span><span class="code-property">self</span>, <span class="code-property">vocab_size</span>, <span class="code-property">dim</span><span class="code-operator">)</span>:</span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">vocab_size</span> = <span class="code-property">vocab_size</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">dim</span> = <span class="code-property">dim</span></span>
+          <span class="code-line"></span>
+          <span class="code-line">        <span class="code-comment"># 计算分片大小</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">shard_size</span> = <span class="code-property">vocab_size</span> // <span class="code-property">world_size</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">embedding</span> = <span class="code-function">nn.Embedding</span><span class="code-operator">(</span></span>
+          <span class="code-line">            <span class="code-property">self</span>.<span class="code-property">shard_size</span>, <span class="code-property">dim</span></span>
+          <span class="code-line">        <span class="code-operator">)</span></span>
+          <span class="code-line"></span>
+          <span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">forward</span><span class="code-operator">(</span><span class="code-property">self</span>, <span class="code-property">tokens</span><span class="code-operator">)</span>:</span>
+          <span class="code-line">        <span class="code-comment"># 收集所有GPU上的嵌入</span></span>
+          <span class="code-line">        <span class="code-keyword">return</span> <span class="code-function">all_gather</span><span class="code-operator">(</span><span class="code-property">self</span>.<span class="code-property">embedding</span><span class="code-operator">(</span><span class="code-property">tokens</span><span class="code-operator">))</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">自然语言解释</span>
+          <div class="translation-lines">
+            <div class="tl">定义ParallelEmbedding类，用于分布式词嵌入</div>
+            <div class="tl">计算每个GPU负责的词汇表分片大小</div>
+            <div class="tl">每个GPU只存储自己负责的那部分嵌入矩阵</div>
+            <div class="tl">forward时通过all_gather收集所有GPU的结果</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">词汇表特殊Token</h2>
+      
+      <div class="badge-list">
+        <div class="badge-item animate-in">
+          <span class="badge-code">[PAD] = 0</span>
+          <span class="badge-desc">填充token，用于对齐不同长度的序列</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">[EOS] = 1</span>
+          <span class="badge-desc">结束符token，表示文本生成结束</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">[SOS] = 2</span>
+          <span class="badge-desc">开始符token，标记序列开始</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">[MASK] = 3</span>
+          <span class="badge-desc">掩码token，用于预训练任务</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">编码系统测验</h2>
+      
+      <div class="quiz-container" id="quiz-4">
+        <div class="quiz-question-block" data-correct="a" data-explanation-right="正确！分布式词汇表的主要目的是将巨大的嵌入矩阵分片存储在多个GPU上，避免单个GPU显存不足的问题。" data-explanation-wrong="不对哦，分布式词汇表是为了解决显存限制问题，让每个GPU只存储部分词汇表。">
+          <div class="quiz-question">为什么要使用分布式词汇表？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 分散显存压力，每个GPU只存储部分词汇表
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 加速训练速度，并行处理所有token
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 提高模型准确性，使用更多词汇
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 减少模型参数数量
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-4')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-4')">重置</button>
+      </div>
+    </div>
+  </div>
+</section>

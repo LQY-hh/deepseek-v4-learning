@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DeepSeek-V4-Flash 深度解析</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400;1,9..40,500&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+  <style>
+    :root {
+      --color-accent:       #536af5;
+      --color-accent-hover: #4357d4;
+      --color-accent-light: #e8edff;
+      --color-accent-muted: #8b99f0;
+    }
+  </style>
+
+  <script src="main.js" defer></script>
+</head>
+<body>
+
+  <nav class="nav" id="nav">
+    <div class="progress-bar" id="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    <div class="nav-inner">
+      <span class="nav-title">DeepSeek-V4-Flash 深度解析</span>
+      <div class="nav-dots" id="nav-dots" role="tablist">
+        <button class="nav-dot" data-target="module-1" data-tooltip="项目概览" role="tab" aria-label="模块 1: 项目概览"></button>
+        <button class="nav-dot" data-target="module-2" data-tooltip="核心架构" role="tab" aria-label="模块 2: 核心架构"></button>
+        <button class="nav-dot" data-target="module-3" data-tooltip="推理流程" role="tab" aria-label="模块 3: 推理流程"></button>
+        <button class="nav-dot" data-target="module-4" data-tooltip="编码系统" role="tab" aria-label="模块 4: 编码系统"></button>
+        <button class="nav-dot" data-target="module-5" data-tooltip="高效计算" role="tab" aria-label="模块 5: 高效计算"></button>
+        <button class="nav-dot" data-target="module-6" data-tooltip="实战总结" role="tab" aria-label="模块 6: 实战总结"></button>
+      </div>
+    </div>
+  </nav>
+
+  <main id="main"><section class="module" id="module-1">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">DeepSeek-V4-Flash 项目概览</h1>
+      <p class="module-subtitle">探索一个支持百万token上下文的高效MoE大语言模型</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">什么是 DeepSeek-V4-Flash?</h2>
+      <p class="animate-in">DeepSeek-V4-Flash 是 DeepSeek-AI 推出的新一代 <span class="term" data-definition="Mixture of Experts：一种高效的模型架构，通过动态路由将不同token分配给不同的专家网络处理">MoE</span>（混合专家）语言模型。它拥有 <strong>284B 总参数</strong>，但每次推理仅激活 <strong>13B 参数</strong>，在保持高性能的同时大幅降低了计算成本。</p>
+      
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">⚡</div>
+          <h3 class="pattern-title">超高效率</h3>
+          <p class="pattern-desc">相比上一代，推理FLOPs降低73%，KV缓存减少90%</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">📚</div>
+          <h3 class="pattern-title">超长上下文</h3>
+          <p class="pattern-desc">支持100万token上下文窗口，处理海量文本游刃有余</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">🧠</div>
+          <h3 class="pattern-title">MoE架构</h3>
+          <p class="pattern-desc">256个专家，每次激活6个，动态路由精准匹配</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">🚀</div>
+          <h3 class="pattern-title">量化优化</h3>
+          <p class="pattern-desc">FP4/FP8混合量化，显存占用大幅降低</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">项目文件结构</h2>
+      <p class="animate-in">让我们先了解项目的组织方式：</p>
+      
+      <div class="file-tree animate-in">
+        <div class="ft-folder"><span class="ft-name">DeepSeek-V4-Flash</span>
+          <div class="ft-children">
+            <div class="ft-folder"><span class="ft-name">inference</span>
+              <div class="ft-children">
+                <div class="ft-file"><span class="ft-name">model.py</span><span class="ft-desc">核心模型定义</span></div>
+                <div class="ft-file"><span class="ft-name">generate.py</span><span class="ft-desc">文本生成逻辑</span></div>
+                <div class="ft-file"><span class="ft-name">kernel.py</span><span class="ft-desc">高效计算内核</span></div>
+                <div class="ft-file"><span class="ft-name">config.json</span><span class="ft-desc">模型配置参数</span></div>
+              </div>
+            </div>
+            <div class="ft-folder"><span class="ft-name">encoding</span>
+              <div class="ft-children">
+                <div class="ft-file"><span class="ft-name">encoding_dsv4.py</span><span class="ft-desc">消息编码系统</span></div>
+              </div>
+            </div>
+            <div class="ft-file"><span class="ft-name">README.md</span><span class="ft-desc">项目说明文档</span></div>
+            <div class="ft-file"><span class="ft-name">config.json</span><span class="ft-desc">全局配置</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">核心技术亮点</h2>
+      
+      <div class="step-cards">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>混合注意力架构</strong>
+            <p>结合压缩稀疏注意力(CSA)和高度压缩注意力(HCA)，实现超长上下文高效处理</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>流形约束超连接(mHC)</strong>
+            <p>增强残差连接稳定性，改进信号传播，提升模型表达能力</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Muon优化器</strong>
+            <p>更快收敛，更好的训练稳定性，支持大规模模型训练</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">快速入门测验</h2>
+      
+      <div class="quiz-container" id="quiz-1">
+        <div class="quiz-question-block" data-correct="b" data-explanation-right="正确！DeepSeek-V4-Flash拥有284B总参数，但每次推理仅激活13B。这种设计让模型既能保持大容量带来的知识储备，又能通过MoE架构实现高效推理。" data-explanation-wrong="不对哦，DeepSeek-V4-Flash采用MoE架构，总参数284B，但每次推理只激活部分专家。">
+          <div class="quiz-question">DeepSeek-V4-Flash的参数配置是怎样的？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 13B总参数，全部激活
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 284B总参数，13B激活
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 284B总参数，全部激活
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 1.6T总参数，49B激活
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-1')">重置</button>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-2">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Transformer 核心架构</h1>
+      <p class="module-subtitle">深入理解 DeepSeek-V4-Flash 的模型结构设计</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">模型架构总览</h2>
+      <p class="animate-in">DeepSeek-V4-Flash 的核心是一个基于 <span class="term" data-definition="Transformer架构：由多个编码器/解码器层堆叠组成的深度学习架构，通过自注意力机制处理序列数据">Transformer</span> 的 MoE 模型。让我们看看它的主要组件：</p>
+      
+      <div class="arch-diagram animate-in">
+        <div class="arch-zone">
+          <div class="arch-zone-label">输入层</div>
+          <div class="arch-component" data-desc="将token ID转换为向量表示，支持分布式词汇表分片">
+            <div class="arch-icon">🔤</div>
+            <span>ParallelEmbedding</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <div class="arch-zone-label">Transformer层</div>
+          <div class="arch-component" data-desc="标准Transformer块，包含注意力和MoE前馈网络，带超连接机制">
+            <div class="arch-icon">🧱</div>
+            <span>Block x 43</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <div class="arch-zone-label">输出层</div>
+          <div class="arch-component" data-desc="最终线性层，输出词汇表概率分布">
+            <div class="arch-icon">📝</div>
+            <span>ParallelHead</span>
+          </div>
+        </div>
+        <div class="arch-description">点击组件查看详情</div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">核心组件详解</h2>
+      
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">Python</span>
+          <span class="code-line"><span class="code-keyword">class</span> <span class="code-function">Transformer</span><span class="code-keyword">(nn.Module)</span>:</span>
+          <span class="code-line">    <span class="code-comment"># 初始化全局状态</span></span>
+          <span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span><span class="code-operator">(</span><span class="code-property">self</span>, <span class="code-property">args</span><span class="code-operator">:</span> <span class="code-function">ModelArgs</span><span class="code-operator">)</span>:</span>
+          <span class="code-line">        <span class="code-keyword">global</span> <span class="code-property">world_size</span>, <span class="code-property">rank</span></span>
+          <span class="code-line">        <span class="code-property">world_size</span> = <span class="code-function">dist</span>.<span class="code-function">get_world_size</span><span class="code-operator">()</span></span>
+          <span class="code-line"></span>
+          <span class="code-line">        <span class="code-comment"># 构建组件</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">embed</span> = <span class="code-function">ParallelEmbedding</span><span class="code-operator">(</span><span class="code-property">args</span>.<span class="code-property">vocab_size</span>, <span class="code-property">args</span>.<span class="code-property">dim</span><span class="code-operator">)</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">layers</span> = <span class="code-function">ModuleList</span><span class="code-operator">([</span></span>
+          <span class="code-line">            <span class="code-function">Block</span><span class="code-operator">(</span><span class="code-property">i</span>, <span class="code-property">args</span><span class="code-operator">)</span></span>
+          <span class="code-line">            <span class="code-keyword">for</span> <span class="code-property">i</span> <span class="code-keyword">in</span> <span class="code-function">range</span><span class="code-operator">(</span><span class="code-property">args</span>.<span class="code-property">n_layers</span><span class="code-operator">)</span></span>
+          <span class="code-line">        <span class="code-operator">])</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">head</span> = <span class="code-function">ParallelHead</span><span class="code-operator">(</span><span class="code-property">args</span>.<span class="code-property">vocab_size</span>, <span class="code-property">args</span>.<span class="code-property">dim</span><span class="code-operator">)</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">自然语言解释</span>
+          <div class="translation-lines">
+            <div class="tl">定义Transformer类，继承自PyTorch的nn.Module</div>
+            <div class="tl">在初始化时设置分布式训练的全局参数（world_size和rank）</div>
+            <div class="tl">创建词嵌入层，将token转换为向量</div>
+            <div class="tl">创建43个Transformer块组成的列表</div>
+            <div class="tl">创建输出头，将模型输出映射到词汇表</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">MoE 混合专家机制</h2>
+      <p class="animate-in">MoE（混合专家）是 DeepSeek-V4-Flash 的核心创新。它通过动态路由将不同的 token 分配给不同的专家网络处理：</p>
+      
+      <div class="flow-animation animate-in" data-steps='[{"highlight": "tokens", "label": "输入tokens进入模型"}, {"highlight": "gate", "label": "Gate层计算每个token应该分配给哪些专家"}, {"highlight": "experts", "label": "激活的专家并行处理各自的token"}, {"highlight": "combine", "label": "加权合并专家输出"}, {"highlight": "output", "label": "最终输出"}]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-tokens">
+            <div class="flow-actor-icon">📥</div>
+            <span>Tokens</span>
+          </div>
+          <div class="flow-actor" id="flow-gate">
+            <div class="flow-actor-icon">🚪</div>
+            <span>Gate</span>
+          </div>
+          <div class="flow-actor" id="flow-experts">
+            <div class="flow-actor-icon">🧠</div>
+            <span>Experts</span>
+          </div>
+          <div class="flow-actor" id="flow-combine">
+            <div class="flow-actor-icon">⚗️</div>
+            <span>Combine</span>
+          </div>
+          <div class="flow-actor" id="flow-output">
+            <div class="flow-actor-icon">📤</div>
+            <span>Output</span>
+          </div>
+        </div>
+        <div class="flow-step-label">点击 "Next Step" 开始动画</div>
+        <div class="flow-packet"></div>
+        <div class="flow-controls">
+          <button class="btn btn-primary flow-next-btn">Next Step</button>
+          <button class="btn flow-reset-btn">Reset</button>
+          <span class="flow-progress">Step 0 / 5</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">MoE 配置参数</h2>
+      
+      <div class="badge-list">
+        <div class="badge-item animate-in">
+          <span class="badge-code">n_routed_experts: 256</span>
+          <span class="badge-desc">可路由专家总数，每个token动态选择</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">n_shared_experts: 1</span>
+          <span class="badge-desc">共享专家，所有token都会经过</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">n_activated_experts: 6</span>
+          <span class="badge-desc">每个token激活的专家数量</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">score_func: sqrtsoftplus</span>
+          <span class="badge-desc">路由评分函数，决定token分配</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">架构知识测验</h2>
+      
+      <div class="quiz-container" id="quiz-2">
+        <div class="quiz-question-block" data-correct="c" data-explanation-right="正确！MoE的关键优势在于条件计算——每个token只激活部分专家，这样可以在保持大规模模型容量的同时，控制单次推理的计算量。" data-explanation-wrong="不对哦，MoE的主要优势是条件计算，让大规模模型也能高效推理。">
+          <div class="quiz-question">MoE（混合专家）架构的主要优势是什么？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 所有专家处理所有token，提高准确性
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 减少模型参数数量
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 条件计算，每个token只激活部分专家
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 简化模型结构，便于训练
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-2')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-2')">重置</button>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-3">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">03</span>
+      <h1 class="module-title">文本生成推理流程</h1>
+      <p class="module-subtitle">理解模型如何根据输入生成文本</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">推理流程概述</h2>
+      <p class="animate-in">推理过程分为两个阶段：Prefill（预填充）阶段处理初始prompt，Decode（解码）阶段逐个生成新token。</p>
+      
+      <div class="flow-steps">
+        <div class="flow-step animate-in">
+          <div class="flow-step-num">1</div>
+          <p>Tokenize输入文本</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step animate-in">
+          <div class="flow-step-num">2</div>
+          <p>Prefill处理</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step animate-in">
+          <div class="flow-step-num">3</div>
+          <p>Decode循环</p>
+        </div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step animate-in">
+          <div class="flow-step-num">4</div>
+          <p>生成完成</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">核心生成逻辑</h2>
+      
+      <div class="chat-window animate-in" id="chat-1">
+        <div class="chat-messages">
+          <div class="chat-message" data-sender="User" style="display: none;">
+            <div class="chat-avatar" style="background: #2A7B9B;">U</div>
+            <div class="chat-bubble">
+              <span class="chat-sender">User</span>
+              <p>什么是DeepSeek-V4-Flash?</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="Tokenize" style="display: none;">
+            <div class="chat-avatar" style="background: #7B6DAA;">T</div>
+            <div class="chat-bubble">
+              <span class="chat-sender">Tokenize</span>
+              <p>将文本转换为token IDs: [279, 511, ...]</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="Prefill" style="display: none;">
+            <div class="chat-avatar" style="background: #D4A843;">P</div>
+            <div class="chat-bubble">
+              <span class="chat-sender">Prefill</span>
+              <p>并行处理所有输入token，计算KV缓存</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="Decode" style="display: none;">
+            <div class="chat-avatar" style="background: #2D8B55;">D</div>
+            <div class="chat-bubble">
+              <span class="chat-sender">Decode</span>
+              <p>逐token生成: "Deep" → "Seek" → "-" → "V4" → ...</p>
+            </div>
+          </div>
+          <div class="chat-message" data-sender="Output" style="display: none;">
+            <div class="chat-avatar" style="background: #D94F30;">O</div>
+            <div class="chat-bubble">
+              <span class="chat-sender">Output</span>
+              <p>解码token序列，返回最终文本</p>
+            </div>
+          </div>
+        </div>
+        <div class="chat-typing" style="display: none;">
+          <div class="chat-avatar" id="chat-1-typing-avatar" style="background: #2A7B9B;">U</div>
+          <div class="chat-typing-dots">
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+            <span class="typing-dot"></span>
+          </div>
+        </div>
+        <div class="chat-controls">
+          <button class="btn btn-primary chat-next-btn">Next Message</button>
+          <button class="btn chat-all-btn">Play All</button>
+          <button class="btn chat-reset-btn">Reset</button>
+          <span class="chat-progress">0 / 5 messages</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">生成函数核心代码</h2>
+      
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">Python</span>
+          <span class="code-line"><span class="code-keyword">def</span> <span class="code-function">generate</span><span class="code-operator">(</span></span>
+          <span class="code-line">    <span class="code-property">model</span>, <span class="code-property">prompt_tokens</span>,</span>
+          <span class="code-line">    <span class="code-property">max_new_tokens</span>, <span class="code-property">eos_id</span></span>
+          <span class="code-line"><span class="code-operator">)</span>:</span>
+          <span class="code-line">    <span class="code-comment"># Prefill阶段</span></span>
+          <span class="code-line">    <span class="code-property">logits</span> = <span class="code-property">model</span>.<span class="code-function">forward</span><span class="code-operator">(</span></span>
+          <span class="code-line">        <span class="code-property">tokens</span>[<span class="code-operator">:,</span> <span class="code-property">prev_pos</span><span class="code-operator">:</span><span class="code-property">cur_pos</span>],</span>
+          <span class="code-line">        <span class="code-property">prev_pos</span></span>
+          <span class="code-line">    <span class="code-operator">)</span></span>
+          <span class="code-line"></span>
+          <span class="code-line">    <span class="code-comment"># Decode阶段循环</span></span>
+          <span class="code-line">    <span class="code-keyword">for</span> <span class="code-property">cur_pos</span> <span class="code-keyword">in</span> <span class="code-function">range</span><span class="code-operator">(</span><span class="code-property">total_len</span><span class="code-operator">)</span>:</span>
+          <span class="code-line">        <span class="code-property">next_token</span> = <span class="code-function">sample</span><span class="code-operator">(</span><span class="code-property">logits</span><span class="code-operator">)</span></span>
+          <span class="code-line">        <span class="code-property">tokens</span>[<span class="code-operator">:,</span> <span class="code-property">cur_pos</span>] = <span class="code-property">next_token</span></span>
+          <span class="code-line">        <span class="code-keyword">if</span> <span class="code-property">next_token</span> == <span class="code-property">eos_id</span><span class="code-operator">:</span></span>
+          <span class="code-line">            <span class="code-keyword">break</span></span>
+          <span class="code-line">    <span class="code-keyword">return</span> <span class="code-property">tokens</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">自然语言解释</span>
+          <div class="translation-lines">
+            <div class="tl">定义generate函数，接收模型、prompt tokens等参数</div>
+            <div class="tl">Prefill阶段：一次性处理所有输入token，填充KV缓存</div>
+            <div class="tl">Decode阶段：循环生成新token</div>
+            <div class="tl">对logits采样得到下一个token</div>
+            <div class="tl">检查是否达到结束符(eos_id)</div>
+            <div class="tl">返回完整的token序列</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">采样策略</h2>
+      
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">🎲</div>
+          <h3 class="pattern-title">温度采样</h3>
+          <p class="pattern-desc">temperature=0 → 确定性输出，选择概率最高的token</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">🎯</div>
+          <h3 class="pattern-title">Top-K采样</h3>
+          <p class="pattern-desc">只从概率最高的K个token中选择，平衡多样性和质量</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">📊</div>
+          <h3 class="pattern-title">Top-P采样</h3>
+          <p class="pattern-desc">累积概率达到P时停止，动态调整候选token数量</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">⚡</div>
+          <h3 class="pattern-title">Gumbel-Max</h3>
+          <p class="pattern-desc">高效采样方法，避免GPU到CPU同步，提升生成速度</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">推理测验</h2>
+      
+      <div class="quiz-container" id="quiz-3">
+        <div class="quiz-question-block" data-correct="d" data-explanation-right="正确！Prefill阶段处理所有输入token并构建KV缓存，Decode阶段则是逐个生成新token，这是LLM推理的标准两阶段流程。" data-explanation-wrong="不对哦，Prefill是一次性处理输入，Decode是逐token生成。">
+          <div class="quiz-question">关于Prefill和Decode阶段，以下哪个说法正确？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 两个阶段都是逐token处理
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> Decode阶段处理输入token
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> Prefill阶段生成新token
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> Prefill处理输入，Decode生成新token
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-3')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-3')">重置</button>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-4">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">04</span>
+      <h1 class="module-title">编码系统详解</h1>
+      <p class="module-subtitle">探索消息编码和分布式词汇表处理机制</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">分布式词汇表</h2>
+      <p class="animate-in">DeepSeek-V4-Flash使用分布式词汇表，将词汇表分片存储在不同的GPU上，支持超大规模模型的训练和推理。</p>
+      
+      <div class="layer-demo animate-in">
+        <div class="layer-tabs">
+          <button class="layer-tab active" onclick="showLayer('layer-1', this)">词嵌入</button>
+          <button class="layer-tab" onclick="showLayer('layer-2', this)">词汇表分片</button>
+          <button class="layer-tab" onclick="showLayer('layer-3', this)">输出头</button>
+        </div>
+        <div class="layer-content">
+          <div class="layer" id="layer-1">
+            <div class="layer-visual">
+              <div class="vocab-block">
+                <div class="vocab-item">Token ID: 0</div>
+                <div class="vocab-arrow">→</div>
+                <div class="vocab-item">Embedding Vector</div>
+              </div>
+              <div class="vocab-block">
+                <div class="vocab-item">Token ID: 1</div>
+                <div class="vocab-arrow">→</div>
+                <div class="vocab-item">Embedding Vector</div>
+              </div>
+              <div class="vocab-block">
+                <div class="vocab-item">Token ID: N</div>
+                <div class="vocab-arrow">→</div>
+                <div class="vocab-item">Embedding Vector</div>
+              </div>
+            </div>
+          </div>
+          <div class="layer" id="layer-2" style="display: none;">
+            <div class="layer-visual">
+              <div class="shard-container">
+                <div class="shard">GPU 0<br>Tokens 0-8191</div>
+                <div class="shard">GPU 1<br>Tokens 8192-16383</div>
+                <div class="shard">GPU 2<br>Tokens 16384-24575</div>
+                <div class="shard">GPU 3<br>Tokens 24576-32767</div>
+              </div>
+              <p class="shard-note">词汇表大小: 128,256 tokens</p>
+            </div>
+          </div>
+          <div class="layer" id="layer-3" style="display: none;">
+            <div class="layer-visual">
+              <div class="head-block">
+                <div class="head-input">Hidden States</div>
+                <div class="head-arrow">→</div>
+                <div class="head-matrix">Parallel Head</div>
+                <div class="head-arrow">→</div>
+                <div class="head-output">Logits (128K)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">编码系统代码解析</h2>
+      
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">Python</span>
+          <span class="code-line"><span class="code-keyword">class</span> <span class="code-function">ParallelEmbedding</span><span class="code-keyword">(nn.Module)</span>:</span>
+          <span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span><span class="code-operator">(</span><span class="code-property">self</span>, <span class="code-property">vocab_size</span>, <span class="code-property">dim</span><span class="code-operator">)</span>:</span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">vocab_size</span> = <span class="code-property">vocab_size</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">dim</span> = <span class="code-property">dim</span></span>
+          <span class="code-line"></span>
+          <span class="code-line">        <span class="code-comment"># 计算分片大小</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">shard_size</span> = <span class="code-property">vocab_size</span> // <span class="code-property">world_size</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">embedding</span> = <span class="code-function">nn.Embedding</span><span class="code-operator">(</span></span>
+          <span class="code-line">            <span class="code-property">self</span>.<span class="code-property">shard_size</span>, <span class="code-property">dim</span></span>
+          <span class="code-line">        <span class="code-operator">)</span></span>
+          <span class="code-line"></span>
+          <span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">forward</span><span class="code-operator">(</span><span class="code-property">self</span>, <span class="code-property">tokens</span><span class="code-operator">)</span>:</span>
+          <span class="code-line">        <span class="code-comment"># 收集所有GPU上的嵌入</span></span>
+          <span class="code-line">        <span class="code-keyword">return</span> <span class="code-function">all_gather</span><span class="code-operator">(</span><span class="code-property">self</span>.<span class="code-property">embedding</span><span class="code-operator">(</span><span class="code-property">tokens</span><span class="code-operator">))</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">自然语言解释</span>
+          <div class="translation-lines">
+            <div class="tl">定义ParallelEmbedding类，用于分布式词嵌入</div>
+            <div class="tl">计算每个GPU负责的词汇表分片大小</div>
+            <div class="tl">每个GPU只存储自己负责的那部分嵌入矩阵</div>
+            <div class="tl">forward时通过all_gather收集所有GPU的结果</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">词汇表特殊Token</h2>
+      
+      <div class="badge-list">
+        <div class="badge-item animate-in">
+          <span class="badge-code">[PAD] = 0</span>
+          <span class="badge-desc">填充token，用于对齐不同长度的序列</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">[EOS] = 1</span>
+          <span class="badge-desc">结束符token，表示文本生成结束</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">[SOS] = 2</span>
+          <span class="badge-desc">开始符token，标记序列开始</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">[MASK] = 3</span>
+          <span class="badge-desc">掩码token，用于预训练任务</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">编码系统测验</h2>
+      
+      <div class="quiz-container" id="quiz-4">
+        <div class="quiz-question-block" data-correct="a" data-explanation-right="正确！分布式词汇表的主要目的是将巨大的嵌入矩阵分片存储在多个GPU上，避免单个GPU显存不足的问题。" data-explanation-wrong="不对哦，分布式词汇表是为了解决显存限制问题，让每个GPU只存储部分词汇表。">
+          <div class="quiz-question">为什么要使用分布式词汇表？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 分散显存压力，每个GPU只存储部分词汇表
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 加速训练速度，并行处理所有token
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 提高模型准确性，使用更多词汇
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 减少模型参数数量
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-4')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-4')">重置</button>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-5">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">高效计算技术</h1>
+      <p class="module-subtitle">探索模型的性能优化和量化技术</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">量化策略</h2>
+      <p class="animate-in">DeepSeek-V4-Flash采用FP4/FP8混合量化策略，在保持模型质量的同时大幅降低显存占用。</p>
+      
+      <div class="comparison-cards">
+        <div class="comparison-card animate-in">
+          <div class="comparison-header">FP16（传统）</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>精度</span>
+              <span class="comparison-value">高</span>
+            </div>
+            <div class="comparison-row">
+              <span>显存占用</span>
+              <span class="comparison-value">高</span>
+            </div>
+            <div class="comparison-row">
+              <span>速度</span>
+              <span class="comparison-value">较慢</span>
+            </div>
+          </div>
+        </div>
+        <div class="comparison-card animate-in highlight">
+          <div class="comparison-header">FP4/FP8（Flash）</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>精度</span>
+              <span class="comparison-value">接近FP16</span>
+            </div>
+            <div class="comparison-row">
+              <span>显存占用</span>
+              <span class="comparison-value">降低75%</span>
+            </div>
+            <div class="comparison-row">
+              <span>速度</span>
+              <span class="comparison-value">显著提升</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">稀疏注意力机制</h2>
+      <p class="animate-in">DeepSeek-V4-Flash使用压缩稀疏注意力(CSA)和高度压缩注意力(HCA)实现超长上下文处理：</p>
+      
+      <div class="arch-diagram animate-in">
+        <div class="arch-zone">
+          <div class="arch-zone-label">标准注意力</div>
+          <div class="arch-component" data-desc="O(n²)复杂度，不适用于长序列">
+            <div class="arch-icon">📊</div>
+            <span>Full Attention</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <div class="arch-zone-label">CSA</div>
+          <div class="arch-component" data-desc="压缩稀疏注意力，降低内存带宽需求">
+            <div class="arch-icon">🔄</div>
+            <span>Compressed Sparse</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <div class="arch-zone-label">HCA</div>
+          <div class="arch-component" data-desc="高度压缩注意力，适用于百万token">
+            <div class="arch-icon">🚀</div>
+            <span>Highly Compressed</span>
+          </div>
+        </div>
+        <div class="arch-description">点击查看不同注意力机制的特点</div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">性能优化代码</h2>
+      
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">Python</span>
+          <span class="code-line"><span class="code-keyword">def</span> <span class="code-function">attention_forward</span><span class="code-operator">(</span></span>
+          <span class="code-line">    <span class="code-property">q</span>, <span class="code-property">k</span>, <span class="code-property">v</span>,</span>
+          <span class="code-line">    <span class="code-property">attn_mask</span>, <span class="code-property">causal</span><span class="code-operator">)</span>:</span>
+          <span class="code-line"></span>
+          <span class="code-line">    <span class="code-comment"># Flash Attention优化</span></span>
+          <span class="code-line">    <span class="code-property">out</span> = <span class="code-function">flash_attn_qkvpacked_func</span><span class="code-operator">(</span></span>
+          <span class="code-line">        <span class="code-function">torch</span>.<span class="code-function">stack</span><span class="code-operator">([</span><span class="code-property">q</span>, <span class="code-property">k</span>, <span class="code-property">v</span><span class="code-operator">])</span>,</span>
+          <span class="code-line">        <span class="code-property">attn_mask</span>,</span>
+          <span class="code-line">        <span class="code-property">causal</span>=<span class="code-property">causal</span></span>
+          <span class="code-line">    <span class="code-operator">)</span></span>
+          <span class="code-line"></span>
+          <span class="code-comment"># 自动混合精度</span>
+          <span class="code-line">    <span class="code-keyword">with</span> <span class="code-function">torch</span>.<span class="code-function">autocast</span><span class="code-operator">(</span><span class="code-property">device_type</span>=<span class="code-string">'cuda'</span><span class="code-operator">)</span>:</span>
+          <span class="code-line">        <span class="code-property">out</span> = <span class="code-property">out</span> @ <span class="code-property">proj</span></span>
+          <span class="code-line">    <span class="code-keyword">return</span> <span class="code-property">out</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">自然语言解释</span>
+          <div class="translation-lines">
+            <div class="tl">使用Flash Attention实现高效注意力计算</div>
+            <div class="tl">将Q、K、V打包传入优化函数</div>
+            <div class="tl">支持因果掩码（causal）用于生成任务</div>
+            <div class="tl">使用自动混合精度加速计算</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">KV缓存优化</h2>
+      <p class="animate-in">KV缓存是提升推理效率的关键技术，DeepSeek-V4-Flash在这方面做了深度优化：</p>
+      
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">💾</div>
+          <h3 class="pattern-title">分页缓存</h3>
+          <p class="pattern-desc">将KV缓存分成固定大小的页面，按需加载和释放</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">🔄</div>
+          <h3 class="pattern-title">动态分配</h3>
+          <p class="pattern-desc">根据序列长度动态调整缓存大小</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">⚡</div>
+          <h3 class="pattern-title">量化存储</h3>
+          <p class="pattern-desc">KV缓存使用FP8量化，减少显存占用</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">📦</div>
+          <h3 class="pattern-title">连续批处理</h3>
+          <p class="pattern-desc">优化多序列推理时的缓存访问模式</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">高效计算测验</h2>
+      
+      <div class="quiz-container" id="quiz-5">
+        <div class="quiz-question-block" data-correct="b" data-explanation-right="正确！KV缓存的作用是存储中间计算结果（键和值），避免在Decode阶段重复计算注意力，从而大幅提升推理效率。" data-explanation-wrong="不对哦，KV缓存是为了避免重复计算注意力，提升推理速度。">
+          <div class="quiz-question">KV缓存的作用是什么？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 存储模型参数，加快加载速度
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 存储注意力计算的中间结果，避免重复计算
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 缓存用户输入的文本
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 存储训练数据，加速训练
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-5')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-5')">重置</button>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="module" id="module-6">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">实战总结与部署</h1>
+      <p class="module-subtitle">学习如何部署和使用 DeepSeek-V4-Flash</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">快速部署指南</h2>
+      
+      <div class="code-block animate-in">
+        <pre class="code-pre"><code class="code-text"><span class="code-comment"># 安装依赖</span>
+pip install torch transformers accelerate
+
+<span class="code-comment"># 克隆项目</span>
+git clone https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash
+cd DeepSeek-V4-Flash
+
+<span class="code-comment"># 运行推理</span>
+python inference/generate.py \
+  --model-path ./ \
+  --prompt "Hello, DeepSeek-V4-Flash!" \
+  --max-tokens 100</code></pre>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">性能对比</h2>
+      <p class="animate-in">DeepSeek-V4-Flash 相比其他模型的性能优势：</p>
+      
+      <div class="comparison-cards">
+        <div class="comparison-card animate-in">
+          <div class="comparison-header">GPT-3.5</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>上下文</span>
+              <span class="comparison-value">8K</span>
+            </div>
+            <div class="comparison-row">
+              <span>参数规模</span>
+              <span class="comparison-value">~175B</span>
+            </div>
+            <div class="comparison-row">
+              <span>效率</span>
+              <span class="comparison-value">基准</span>
+            </div>
+          </div>
+        </div>
+        <div class="comparison-card animate-in">
+          <div class="comparison-header">DeepSeek-V3</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>上下文</span>
+              <span class="comparison-value">128K</span>
+            </div>
+            <div class="comparison-row">
+              <span>参数规模</span>
+              <span class="comparison-value">236B</span>
+            </div>
+            <div class="comparison-row">
+              <span>效率</span>
+              <span class="comparison-value">1x</span>
+            </div>
+          </div>
+        </div>
+        <div class="comparison-card animate-in highlight">
+          <div class="comparison-header">DeepSeek-V4-Flash</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>上下文</span>
+              <span class="comparison-value">1M</span>
+            </div>
+            <div class="comparison-row">
+              <span>参数规模</span>
+              <span class="comparison-value">284B</span>
+            </div>
+            <div class="comparison-row">
+              <span>效率</span>
+              <span class="comparison-value">3.7x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">核心要点回顾</h2>
+      
+      <div class="step-cards">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>MoE架构</strong>
+            <p>256个专家，每次激活6个，实现高效条件计算</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>超长上下文</strong>
+            <p>100万token支持，通过压缩稀疏注意力实现</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>量化优化</strong>
+            <p>FP4/FP8混合量化，显存占用降低75%</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>高效推理</strong>
+            <p>相比上一代，推理FLOPs降低73%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">最后测验</h2>
+      
+      <div class="quiz-container" id="quiz-6">
+        <div class="quiz-question-block" data-correct="c" data-explanation-right="正确！DeepSeek-V4-Flash支持100万token上下文，相比上一代的128K有了巨大提升。" data-explanation-wrong="不对哦，DeepSeek-V4-Flash支持100万token上下文窗口。">
+          <div class="quiz-question">DeepSeek-V4-Flash支持的最大上下文长度是多少？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 8K tokens
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 128K tokens
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 1M tokens
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 10M tokens
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-6')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-6')">重置</button>
+      </div>
+    </div>
+
+    <div class="screen final-screen">
+      <div class="final-content animate-in">
+        <h2 class="final-title">🎉 恭喜完成课程！</h2>
+        <p class="final-text">你已经完成了 DeepSeek-V4-Flash 的全面学习，包括：</p>
+        <ul class="final-list">
+          <li>项目架构和核心组件</li>
+          <li>MoE混合专家机制</li>
+          <li>推理流程和采样策略</li>
+          <li>编码系统和分布式词汇表</li>
+          <li>高效计算和量化技术</li>
+        </ul>
+        <p class="final-text">现在你可以尝试部署和使用这个强大的模型了！</p>
+        <div class="final-badge">DeepSeek-V4-Flash 认证学习者</div>
+      </div>
+    </div>
+  </div>
+</section></main>
+
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>课程信息</h3>
+        <p>DeepSeek-V4-Flash 深度解析</p>
+        <p>版本: 1.0.0</p>
+      </div>
+      <div class="footer-section">
+        <h3>资源链接</h3>
+        <ul>
+          <li><a href="https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash" target="_blank">模型仓库</a></li>
+          <li><a href="https://github.com/deepseek-ai" target="_blank">GitHub</a></li>
+          <li><a href="https://www.deepseek.com" target="_blank">官方网站</a></li>
+        </ul>
+      </div>
+      <div class="footer-section">
+        <h3>关于</h3>
+        <p>本课程基于 DeepSeek-V4-Flash 项目开发，旨在帮助开发者深入理解这个高效的MoE大语言模型。</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2024 DeepSeek-AI. All rights reserved.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

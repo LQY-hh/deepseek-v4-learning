@@ -1,0 +1,170 @@
+<section class="module" id="module-5">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">05</span>
+      <h1 class="module-title">高效计算技术</h1>
+      <p class="module-subtitle">探索模型的性能优化和量化技术</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">量化策略</h2>
+      <p class="animate-in">DeepSeek-V4-Flash采用FP4/FP8混合量化策略，在保持模型质量的同时大幅降低显存占用。</p>
+      
+      <div class="comparison-cards">
+        <div class="comparison-card animate-in">
+          <div class="comparison-header">FP16（传统）</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>精度</span>
+              <span class="comparison-value">高</span>
+            </div>
+            <div class="comparison-row">
+              <span>显存占用</span>
+              <span class="comparison-value">高</span>
+            </div>
+            <div class="comparison-row">
+              <span>速度</span>
+              <span class="comparison-value">较慢</span>
+            </div>
+          </div>
+        </div>
+        <div class="comparison-card animate-in highlight">
+          <div class="comparison-header">FP4/FP8（Flash）</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>精度</span>
+              <span class="comparison-value">接近FP16</span>
+            </div>
+            <div class="comparison-row">
+              <span>显存占用</span>
+              <span class="comparison-value">降低75%</span>
+            </div>
+            <div class="comparison-row">
+              <span>速度</span>
+              <span class="comparison-value">显著提升</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">稀疏注意力机制</h2>
+      <p class="animate-in">DeepSeek-V4-Flash使用压缩稀疏注意力(CSA)和高度压缩注意力(HCA)实现超长上下文处理：</p>
+      
+      <div class="arch-diagram animate-in">
+        <div class="arch-zone">
+          <div class="arch-zone-label">标准注意力</div>
+          <div class="arch-component" data-desc="O(n²)复杂度，不适用于长序列">
+            <div class="arch-icon">📊</div>
+            <span>Full Attention</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <div class="arch-zone-label">CSA</div>
+          <div class="arch-component" data-desc="压缩稀疏注意力，降低内存带宽需求">
+            <div class="arch-icon">🔄</div>
+            <span>Compressed Sparse</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <div class="arch-zone-label">HCA</div>
+          <div class="arch-component" data-desc="高度压缩注意力，适用于百万token">
+            <div class="arch-icon">🚀</div>
+            <span>Highly Compressed</span>
+          </div>
+        </div>
+        <div class="arch-description">点击查看不同注意力机制的特点</div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">性能优化代码</h2>
+      
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">Python</span>
+          <span class="code-line"><span class="code-keyword">def</span> <span class="code-function">attention_forward</span><span class="code-operator">(</span></span>
+          <span class="code-line">    <span class="code-property">q</span>, <span class="code-property">k</span>, <span class="code-property">v</span>,</span>
+          <span class="code-line">    <span class="code-property">attn_mask</span>, <span class="code-property">causal</span><span class="code-operator">)</span>:</span>
+          <span class="code-line"></span>
+          <span class="code-line">    <span class="code-comment"># Flash Attention优化</span></span>
+          <span class="code-line">    <span class="code-property">out</span> = <span class="code-function">flash_attn_qkvpacked_func</span><span class="code-operator">(</span></span>
+          <span class="code-line">        <span class="code-function">torch</span>.<span class="code-function">stack</span><span class="code-operator">([</span><span class="code-property">q</span>, <span class="code-property">k</span>, <span class="code-property">v</span><span class="code-operator">])</span>,</span>
+          <span class="code-line">        <span class="code-property">attn_mask</span>,</span>
+          <span class="code-line">        <span class="code-property">causal</span>=<span class="code-property">causal</span></span>
+          <span class="code-line">    <span class="code-operator">)</span></span>
+          <span class="code-line"></span>
+          <span class="code-comment"># 自动混合精度</span>
+          <span class="code-line">    <span class="code-keyword">with</span> <span class="code-function">torch</span>.<span class="code-function">autocast</span><span class="code-operator">(</span><span class="code-property">device_type</span>=<span class="code-string">'cuda'</span><span class="code-operator">)</span>:</span>
+          <span class="code-line">        <span class="code-property">out</span> = <span class="code-property">out</span> @ <span class="code-property">proj</span></span>
+          <span class="code-line">    <span class="code-keyword">return</span> <span class="code-property">out</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">自然语言解释</span>
+          <div class="translation-lines">
+            <div class="tl">使用Flash Attention实现高效注意力计算</div>
+            <div class="tl">将Q、K、V打包传入优化函数</div>
+            <div class="tl">支持因果掩码（causal）用于生成任务</div>
+            <div class="tl">使用自动混合精度加速计算</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">KV缓存优化</h2>
+      <p class="animate-in">KV缓存是提升推理效率的关键技术，DeepSeek-V4-Flash在这方面做了深度优化：</p>
+      
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">💾</div>
+          <h3 class="pattern-title">分页缓存</h3>
+          <p class="pattern-desc">将KV缓存分成固定大小的页面，按需加载和释放</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">🔄</div>
+          <h3 class="pattern-title">动态分配</h3>
+          <p class="pattern-desc">根据序列长度动态调整缓存大小</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">⚡</div>
+          <h3 class="pattern-title">量化存储</h3>
+          <p class="pattern-desc">KV缓存使用FP8量化，减少显存占用</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">📦</div>
+          <h3 class="pattern-title">连续批处理</h3>
+          <p class="pattern-desc">优化多序列推理时的缓存访问模式</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">高效计算测验</h2>
+      
+      <div class="quiz-container" id="quiz-5">
+        <div class="quiz-question-block" data-correct="b" data-explanation-right="正确！KV缓存的作用是存储中间计算结果（键和值），避免在Decode阶段重复计算注意力，从而大幅提升推理效率。" data-explanation-wrong="不对哦，KV缓存是为了避免重复计算注意力，提升推理速度。">
+          <div class="quiz-question">KV缓存的作用是什么？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 存储模型参数，加快加载速度
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 存储注意力计算的中间结果，避免重复计算
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 缓存用户输入的文本
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 存储训练数据，加速训练
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-5')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-5')">重置</button>
+      </div>
+    </div>
+  </div>
+</section>

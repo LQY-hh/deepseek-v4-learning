@@ -1,0 +1,119 @@
+<section class="module" id="module-1">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">01</span>
+      <h1 class="module-title">DeepSeek-V4-Flash 项目概览</h1>
+      <p class="module-subtitle">探索一个支持百万token上下文的高效MoE大语言模型</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">什么是 DeepSeek-V4-Flash?</h2>
+      <p class="animate-in">DeepSeek-V4-Flash 是 DeepSeek-AI 推出的新一代 <span class="term" data-definition="Mixture of Experts：一种高效的模型架构，通过动态路由将不同token分配给不同的专家网络处理">MoE</span>（混合专家）语言模型。它拥有 <strong>284B 总参数</strong>，但每次推理仅激活 <strong>13B 参数</strong>，在保持高性能的同时大幅降低了计算成本。</p>
+      
+      <div class="pattern-cards stagger-children">
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">⚡</div>
+          <h3 class="pattern-title">超高效率</h3>
+          <p class="pattern-desc">相比上一代，推理FLOPs降低73%，KV缓存减少90%</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">📚</div>
+          <h3 class="pattern-title">超长上下文</h3>
+          <p class="pattern-desc">支持100万token上下文窗口，处理海量文本游刃有余</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">🧠</div>
+          <h3 class="pattern-title">MoE架构</h3>
+          <p class="pattern-desc">256个专家，每次激活6个，动态路由精准匹配</p>
+        </div>
+        <div class="pattern-card animate-in">
+          <div class="pattern-icon" style="background: #e8edff;">🚀</div>
+          <h3 class="pattern-title">量化优化</h3>
+          <p class="pattern-desc">FP4/FP8混合量化，显存占用大幅降低</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">项目文件结构</h2>
+      <p class="animate-in">让我们先了解项目的组织方式：</p>
+      
+      <div class="file-tree animate-in">
+        <div class="ft-folder"><span class="ft-name">DeepSeek-V4-Flash</span>
+          <div class="ft-children">
+            <div class="ft-folder"><span class="ft-name">inference</span>
+              <div class="ft-children">
+                <div class="ft-file"><span class="ft-name">model.py</span><span class="ft-desc">核心模型定义</span></div>
+                <div class="ft-file"><span class="ft-name">generate.py</span><span class="ft-desc">文本生成逻辑</span></div>
+                <div class="ft-file"><span class="ft-name">kernel.py</span><span class="ft-desc">高效计算内核</span></div>
+                <div class="ft-file"><span class="ft-name">config.json</span><span class="ft-desc">模型配置参数</span></div>
+              </div>
+            </div>
+            <div class="ft-folder"><span class="ft-name">encoding</span>
+              <div class="ft-children">
+                <div class="ft-file"><span class="ft-name">encoding_dsv4.py</span><span class="ft-desc">消息编码系统</span></div>
+              </div>
+            </div>
+            <div class="ft-file"><span class="ft-name">README.md</span><span class="ft-desc">项目说明文档</span></div>
+            <div class="ft-file"><span class="ft-name">config.json</span><span class="ft-desc">全局配置</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">核心技术亮点</h2>
+      
+      <div class="step-cards">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>混合注意力架构</strong>
+            <p>结合压缩稀疏注意力(CSA)和高度压缩注意力(HCA)，实现超长上下文高效处理</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>流形约束超连接(mHC)</strong>
+            <p>增强残差连接稳定性，改进信号传播，提升模型表达能力</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>Muon优化器</strong>
+            <p>更快收敛，更好的训练稳定性，支持大规模模型训练</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">快速入门测验</h2>
+      
+      <div class="quiz-container" id="quiz-1">
+        <div class="quiz-question-block" data-correct="b" data-explanation-right="正确！DeepSeek-V4-Flash拥有284B总参数，但每次推理仅激活13B。这种设计让模型既能保持大容量带来的知识储备，又能通过MoE架构实现高效推理。" data-explanation-wrong="不对哦，DeepSeek-V4-Flash采用MoE架构，总参数284B，但每次推理只激活部分专家。">
+          <div class="quiz-question">DeepSeek-V4-Flash的参数配置是怎样的？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 13B总参数，全部激活
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 284B总参数，13B激活
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 284B总参数，全部激活
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 1.6T总参数，49B激活
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-1')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-1')">重置</button>
+      </div>
+    </div>
+  </div>
+</section>

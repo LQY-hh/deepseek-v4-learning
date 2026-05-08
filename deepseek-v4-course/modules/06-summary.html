@@ -1,0 +1,165 @@
+<section class="module" id="module-6">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">06</span>
+      <h1 class="module-title">实战总结与部署</h1>
+      <p class="module-subtitle">学习如何部署和使用 DeepSeek-V4-Flash</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">快速部署指南</h2>
+      
+      <div class="code-block animate-in">
+        <pre class="code-pre"><code class="code-text"><span class="code-comment"># 安装依赖</span>
+pip install torch transformers accelerate
+
+<span class="code-comment"># 克隆项目</span>
+git clone https://huggingface.co/deepseek-ai/DeepSeek-V4-Flash
+cd DeepSeek-V4-Flash
+
+<span class="code-comment"># 运行推理</span>
+python inference/generate.py \
+  --model-path ./ \
+  --prompt "Hello, DeepSeek-V4-Flash!" \
+  --max-tokens 100</code></pre>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">性能对比</h2>
+      <p class="animate-in">DeepSeek-V4-Flash 相比其他模型的性能优势：</p>
+      
+      <div class="comparison-cards">
+        <div class="comparison-card animate-in">
+          <div class="comparison-header">GPT-3.5</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>上下文</span>
+              <span class="comparison-value">8K</span>
+            </div>
+            <div class="comparison-row">
+              <span>参数规模</span>
+              <span class="comparison-value">~175B</span>
+            </div>
+            <div class="comparison-row">
+              <span>效率</span>
+              <span class="comparison-value">基准</span>
+            </div>
+          </div>
+        </div>
+        <div class="comparison-card animate-in">
+          <div class="comparison-header">DeepSeek-V3</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>上下文</span>
+              <span class="comparison-value">128K</span>
+            </div>
+            <div class="comparison-row">
+              <span>参数规模</span>
+              <span class="comparison-value">236B</span>
+            </div>
+            <div class="comparison-row">
+              <span>效率</span>
+              <span class="comparison-value">1x</span>
+            </div>
+          </div>
+        </div>
+        <div class="comparison-card animate-in highlight">
+          <div class="comparison-header">DeepSeek-V4-Flash</div>
+          <div class="comparison-body">
+            <div class="comparison-row">
+              <span>上下文</span>
+              <span class="comparison-value">1M</span>
+            </div>
+            <div class="comparison-row">
+              <span>参数规模</span>
+              <span class="comparison-value">284B</span>
+            </div>
+            <div class="comparison-row">
+              <span>效率</span>
+              <span class="comparison-value">3.7x</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">核心要点回顾</h2>
+      
+      <div class="step-cards">
+        <div class="step-card animate-in">
+          <div class="step-num">1</div>
+          <div class="step-body">
+            <strong>MoE架构</strong>
+            <p>256个专家，每次激活6个，实现高效条件计算</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">2</div>
+          <div class="step-body">
+            <strong>超长上下文</strong>
+            <p>100万token支持，通过压缩稀疏注意力实现</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">3</div>
+          <div class="step-body">
+            <strong>量化优化</strong>
+            <p>FP4/FP8混合量化，显存占用降低75%</p>
+          </div>
+        </div>
+        <div class="step-card animate-in">
+          <div class="step-num">4</div>
+          <div class="step-body">
+            <strong>高效推理</strong>
+            <p>相比上一代，推理FLOPs降低73%</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">最后测验</h2>
+      
+      <div class="quiz-container" id="quiz-6">
+        <div class="quiz-question-block" data-correct="c" data-explanation-right="正确！DeepSeek-V4-Flash支持100万token上下文，相比上一代的128K有了巨大提升。" data-explanation-wrong="不对哦，DeepSeek-V4-Flash支持100万token上下文窗口。">
+          <div class="quiz-question">DeepSeek-V4-Flash支持的最大上下文长度是多少？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 8K tokens
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 128K tokens
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 1M tokens
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 10M tokens
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-6')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-6')">重置</button>
+      </div>
+    </div>
+
+    <div class="screen final-screen">
+      <div class="final-content animate-in">
+        <h2 class="final-title">🎉 恭喜完成课程！</h2>
+        <p class="final-text">你已经完成了 DeepSeek-V4-Flash 的全面学习，包括：</p>
+        <ul class="final-list">
+          <li>项目架构和核心组件</li>
+          <li>MoE混合专家机制</li>
+          <li>推理流程和采样策略</li>
+          <li>编码系统和分布式词汇表</li>
+          <li>高效计算和量化技术</li>
+        </ul>
+        <p class="final-text">现在你可以尝试部署和使用这个强大的模型了！</p>
+        <div class="final-badge">DeepSeek-V4-Flash 认证学习者</div>
+      </div>
+    </div>
+  </div>
+</section>

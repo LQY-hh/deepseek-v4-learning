@@ -1,0 +1,11 @@
+# 排除 codebase-to-course 文件夹
+codebase-to-course/
+
+# 其他常见忽略项
+*.pyc
+__pycache__/
+*.egg-info/
+.DS_Store
+.vscode/
+.idea/
+*.log

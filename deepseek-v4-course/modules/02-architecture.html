@@ -1,0 +1,159 @@
+<section class="module" id="module-2">
+  <div class="module-content">
+    <div class="module-header animate-in">
+      <span class="module-number">02</span>
+      <h1 class="module-title">Transformer 核心架构</h1>
+      <p class="module-subtitle">深入理解 DeepSeek-V4-Flash 的模型结构设计</p>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">模型架构总览</h2>
+      <p class="animate-in">DeepSeek-V4-Flash 的核心是一个基于 <span class="term" data-definition="Transformer架构：由多个编码器/解码器层堆叠组成的深度学习架构，通过自注意力机制处理序列数据">Transformer</span> 的 MoE 模型。让我们看看它的主要组件：</p>
+      
+      <div class="arch-diagram animate-in">
+        <div class="arch-zone">
+          <div class="arch-zone-label">输入层</div>
+          <div class="arch-component" data-desc="将token ID转换为向量表示，支持分布式词汇表分片">
+            <div class="arch-icon">🔤</div>
+            <span>ParallelEmbedding</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <div class="arch-zone-label">Transformer层</div>
+          <div class="arch-component" data-desc="标准Transformer块，包含注意力和MoE前馈网络，带超连接机制">
+            <div class="arch-icon">🧱</div>
+            <span>Block x 43</span>
+          </div>
+        </div>
+        <div class="arch-zone">
+          <div class="arch-zone-label">输出层</div>
+          <div class="arch-component" data-desc="最终线性层，输出词汇表概率分布">
+            <div class="arch-icon">📝</div>
+            <span>ParallelHead</span>
+          </div>
+        </div>
+        <div class="arch-description">点击组件查看详情</div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">核心组件详解</h2>
+      
+      <div class="translation-block animate-in">
+        <div class="translation-code">
+          <span class="translation-label">Python</span>
+          <span class="code-line"><span class="code-keyword">class</span> <span class="code-function">Transformer</span><span class="code-keyword">(nn.Module)</span>:</span>
+          <span class="code-line">    <span class="code-comment"># 初始化全局状态</span></span>
+          <span class="code-line">    <span class="code-keyword">def</span> <span class="code-function">__init__</span><span class="code-operator">(</span><span class="code-property">self</span>, <span class="code-property">args</span><span class="code-operator">:</span> <span class="code-function">ModelArgs</span><span class="code-operator">)</span>:</span>
+          <span class="code-line">        <span class="code-keyword">global</span> <span class="code-property">world_size</span>, <span class="code-property">rank</span></span>
+          <span class="code-line">        <span class="code-property">world_size</span> = <span class="code-function">dist</span>.<span class="code-function">get_world_size</span><span class="code-operator">()</span></span>
+          <span class="code-line"></span>
+          <span class="code-line">        <span class="code-comment"># 构建组件</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">embed</span> = <span class="code-function">ParallelEmbedding</span><span class="code-operator">(</span><span class="code-property">args</span>.<span class="code-property">vocab_size</span>, <span class="code-property">args</span>.<span class="code-property">dim</span><span class="code-operator">)</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">layers</span> = <span class="code-function">ModuleList</span><span class="code-operator">([</span></span>
+          <span class="code-line">            <span class="code-function">Block</span><span class="code-operator">(</span><span class="code-property">i</span>, <span class="code-property">args</span><span class="code-operator">)</span></span>
+          <span class="code-line">            <span class="code-keyword">for</span> <span class="code-property">i</span> <span class="code-keyword">in</span> <span class="code-function">range</span><span class="code-operator">(</span><span class="code-property">args</span>.<span class="code-property">n_layers</span><span class="code-operator">)</span></span>
+          <span class="code-line">        <span class="code-operator">])</span></span>
+          <span class="code-line">        <span class="code-property">self</span>.<span class="code-property">head</span> = <span class="code-function">ParallelHead</span><span class="code-operator">(</span><span class="code-property">args</span>.<span class="code-property">vocab_size</span>, <span class="code-property">args</span>.<span class="code-property">dim</span><span class="code-operator">)</span></span>
+        </div>
+        <div class="translation-english">
+          <span class="translation-label">自然语言解释</span>
+          <div class="translation-lines">
+            <div class="tl">定义Transformer类，继承自PyTorch的nn.Module</div>
+            <div class="tl">在初始化时设置分布式训练的全局参数（world_size和rank）</div>
+            <div class="tl">创建词嵌入层，将token转换为向量</div>
+            <div class="tl">创建43个Transformer块组成的列表</div>
+            <div class="tl">创建输出头，将模型输出映射到词汇表</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">MoE 混合专家机制</h2>
+      <p class="animate-in">MoE（混合专家）是 DeepSeek-V4-Flash 的核心创新。它通过动态路由将不同的 token 分配给不同的专家网络处理：</p>
+      
+      <div class="flow-animation animate-in" data-steps='[{"highlight": "tokens", "label": "输入tokens进入模型"}, {"highlight": "gate", "label": "Gate层计算每个token应该分配给哪些专家"}, {"highlight": "experts", "label": "激活的专家并行处理各自的token"}, {"highlight": "combine", "label": "加权合并专家输出"}, {"highlight": "output", "label": "最终输出"}]'>
+        <div class="flow-actors">
+          <div class="flow-actor" id="flow-tokens">
+            <div class="flow-actor-icon">📥</div>
+            <span>Tokens</span>
+          </div>
+          <div class="flow-actor" id="flow-gate">
+            <div class="flow-actor-icon">🚪</div>
+            <span>Gate</span>
+          </div>
+          <div class="flow-actor" id="flow-experts">
+            <div class="flow-actor-icon">🧠</div>
+            <span>Experts</span>
+          </div>
+          <div class="flow-actor" id="flow-combine">
+            <div class="flow-actor-icon">⚗️</div>
+            <span>Combine</span>
+          </div>
+          <div class="flow-actor" id="flow-output">
+            <div class="flow-actor-icon">📤</div>
+            <span>Output</span>
+          </div>
+        </div>
+        <div class="flow-step-label">点击 "Next Step" 开始动画</div>
+        <div class="flow-packet"></div>
+        <div class="flow-controls">
+          <button class="btn btn-primary flow-next-btn">Next Step</button>
+          <button class="btn flow-reset-btn">Reset</button>
+          <span class="flow-progress">Step 0 / 5</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">MoE 配置参数</h2>
+      
+      <div class="badge-list">
+        <div class="badge-item animate-in">
+          <span class="badge-code">n_routed_experts: 256</span>
+          <span class="badge-desc">可路由专家总数，每个token动态选择</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">n_shared_experts: 1</span>
+          <span class="badge-desc">共享专家，所有token都会经过</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">n_activated_experts: 6</span>
+          <span class="badge-desc">每个token激活的专家数量</span>
+        </div>
+        <div class="badge-item animate-in">
+          <span class="badge-code">score_func: sqrtsoftplus</span>
+          <span class="badge-desc">路由评分函数，决定token分配</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="screen">
+      <h2 class="screen-heading animate-in">架构知识测验</h2>
+      
+      <div class="quiz-container" id="quiz-2">
+        <div class="quiz-question-block" data-correct="c" data-explanation-right="正确！MoE的关键优势在于条件计算——每个token只激活部分专家，这样可以在保持大规模模型容量的同时，控制单次推理的计算量。" data-explanation-wrong="不对哦，MoE的主要优势是条件计算，让大规模模型也能高效推理。">
+          <div class="quiz-question">MoE（混合专家）架构的主要优势是什么？</div>
+          <div class="quiz-options">
+            <button class="quiz-option" onclick="selectOption(this)" data-value="a">
+              <span class="quiz-option-radio"></span> 所有专家处理所有token，提高准确性
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="b">
+              <span class="quiz-option-radio"></span> 减少模型参数数量
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="c">
+              <span class="quiz-option-radio"></span> 条件计算，每个token只激活部分专家
+            </button>
+            <button class="quiz-option" onclick="selectOption(this)" data-value="d">
+              <span class="quiz-option-radio"></span> 简化模型结构，便于训练
+            </button>
+          </div>
+          <div class="quiz-feedback"></div>
+        </div>
+        <button class="quiz-check-btn" onclick="checkQuiz('quiz-2')">检查答案</button>
+        <button class="quiz-reset-btn" onclick="resetQuiz('quiz-2')">重置</button>
+      </div>
+    </div>
+  </div>
+</section>
